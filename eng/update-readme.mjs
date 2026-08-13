@@ -10,9 +10,10 @@ import {
   HOOKS_DIR,
   INSTRUCTIONS_DIR,
   PLUGINS_DIR,
-  repoBaseUrl,
+  publishedArtifactBaseUrl,
   ROOT_FOLDER,
   SKILLS_DIR,
+  sourceContentBaseUrl,
   TEMPLATES,
   vscodeInsidersInstallImage,
   vscodeInstallImage,
@@ -28,6 +29,7 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const EXTENSIONS_DIR = path.join(ROOT_FOLDER, "extensions");
 
 // Cache of MCP registry server names (lower-cased) fetched from the API
 let MCP_REGISTRY_SET = null;
@@ -268,14 +270,16 @@ function formatTableCell(text) {
   return s.trim();
 }
 
-function makeBadges(link, type) {
+function makeBadges(link, type, linkIntent = "source") {
   const aka = AKA_INSTALL_URLS[type] || AKA_INSTALL_URLS.instructions;
+  const rawBaseUrl =
+    linkIntent === "published" ? publishedArtifactBaseUrl : sourceContentBaseUrl;
 
   const vscodeUrl = `${aka}?url=${encodeURIComponent(
-    `vscode:chat-${type}/install?url=${repoBaseUrl}/${link}`
+    `vscode:chat-${type}/install?url=${rawBaseUrl}/${link}`
   )}`;
   const insidersUrl = `${aka}?url=${encodeURIComponent(
-    `vscode-insiders:chat-${type}/install?url=${repoBaseUrl}/${link}`
+    `vscode-insiders:chat-${type}/install?url=${rawBaseUrl}/${link}`
   )}`;
 
   return `[![Install in VS Code](${vscodeInstallImage})](${vscodeUrl})<br />[![Install in VS Code Insiders](${vscodeInsidersInstallImage})](${insidersUrl})`;
@@ -325,7 +329,7 @@ function generateInstructionsSection(instructionsDir) {
     const customDescription = extractDescription(filePath);
 
     // Create badges for installation links
-    const badges = makeBadges(link, "instructions");
+    const badges = makeBadges(link, "instructions", "source");
 
     if (customDescription && customDescription !== "null") {
       // Use the description from frontmatter, table-safe
@@ -689,7 +693,7 @@ function generateUnifiedModeSection(cfg) {
   for (const { file, filePath, title } of entries) {
     const link = encodeURI(`${linkPrefix}/${file}`);
     const description = extractDescription(filePath);
-    const badges = makeBadges(link, badgeType);
+    const badges = makeBadges(link, badgeType, "source");
     let mcpServerCell = "";
     if (includeMcpServers) {
       const servers = extractMcpServerConfigs(filePath);
@@ -712,7 +716,7 @@ function generateUnifiedModeSection(cfg) {
  * Read and parse a plugin.json file from a plugin directory.
  */
 function readPluginJson(pluginDir) {
-  const jsonPath = path.join(pluginDir, ".github/plugin", "plugin.json");
+  const jsonPath = path.join(pluginDir, "plugin.json");
   if (!fs.existsSync(jsonPath)) return null;
   try {
     return JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
@@ -783,10 +787,22 @@ function generatePluginsSection(pluginsDir) {
   for (const entry of sortedEntries) {
     const { plugin, dir, name, isFeatured } = entry;
     const description = formatTableCell(plugin.description || "No description");
+    const composition = plugin.extensions?.["com.github.awesome-copilot"] || {};
+    const extensionReferences = Array.isArray(composition.extensions)
+      ? composition.extensions.length
+      : 0;
+    const implicitExtension =
+      fs.existsSync(path.join(EXTENSIONS_DIR, entry.pluginId, "extension.mjs")) &&
+      !(Array.isArray(composition.extensions) && composition.extensions.some(
+        (reference) => reference === `./extensions/${entry.pluginId}`
+      ))
+      ? 1
+      : 0;
     const itemCount =
-      (plugin.agents || []).length +
-      (plugin.commands || []).length +
-      (plugin.skills || []).length;
+      (composition.agents || []).length +
+      (composition.skills || []).length +
+      extensionReferences +
+      implicitExtension;
     const keywords = plugin.keywords ? plugin.keywords.join(", ") : "";
 
     const link = `../plugins/${dir}/README.md`;
@@ -795,7 +811,16 @@ function generatePluginsSection(pluginsDir) {
     pluginsContent += `| [${displayName}](${link}) | ${description} | ${itemCount} items | ${keywords} |\n`;
   }
 
-  return `${TEMPLATES.pluginsSection}\n${TEMPLATES.pluginsUsage}\n\n${pluginsContent}`;
+  const publishedManifestUrl = `${publishedArtifactBaseUrl}/.github/plugin/marketplace.json`;
+  const sourceTreeUrl =
+    "https://github.com/github/awesome-copilot/tree/main/plugins";
+  const pluginLinkGuidance = [
+    "",
+    `- Published marketplace manifest (tool-facing): \`${publishedManifestUrl}\``,
+    `- Source plugin content (human-authored): \`${sourceTreeUrl}\``,
+  ].join("\n");
+
+  return `${TEMPLATES.pluginsSection}\n${TEMPLATES.pluginsUsage}${pluginLinkGuidance}\n\n${pluginsContent}`;
 }
 
 /**
@@ -830,10 +855,22 @@ function generateFeaturedPluginsSection(pluginsDir) {
             plugin.description || "No description"
           );
           const keywords = plugin.keywords ? plugin.keywords.join(", ") : "";
+          const composition = plugin.extensions?.["com.github.awesome-copilot"] || {};
+          const extensionReferences = Array.isArray(composition.extensions)
+            ? composition.extensions.length
+            : 0;
+          const implicitExtension =
+            fs.existsSync(path.join(EXTENSIONS_DIR, name, "extension.mjs")) &&
+            !(Array.isArray(composition.extensions) && composition.extensions.some(
+              (reference) => reference === `./extensions/${name}`
+            ))
+            ? 1
+            : 0;
           const itemCount =
-            (plugin.agents || []).length +
-            (plugin.commands || []).length +
-            (plugin.skills || []).length;
+            (composition.agents || []).length +
+            (composition.skills || []).length +
+            extensionReferences +
+            implicitExtension;
 
           return {
             dir,

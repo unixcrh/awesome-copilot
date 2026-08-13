@@ -4,21 +4,24 @@ description: "Daily check for new GitHub Copilot features and updates. Opens a P
 on:
   schedule: daily
   workflow_dispatch:
+permissions:
+  contents: read
+  copilot-requests: write
 tools:
-  bash: ["curl", "gh"]
   edit:
   web-fetch:
   github:
     toolsets: [repos]
 safe-outputs:
   allowed-domains:
+    - github.com
     - github.blog
     - code.visualstudio.com
     - nishanil.github.io
   create-pull-request:
     labels: [automated-update, copilot-updates]
     title-prefix: "[bot] "
-    base-branch: staged
+    base-branch: main
 ---
 
 # Check for Awesome GitHub Copilot Updates
@@ -31,11 +34,12 @@ Use `web-fetch` to read the following pages and extract the latest entries from 
 
 - https://github.blog/changelog/label/copilot/ — official changelog
 - https://github.com/github/copilot-cli/blob/main/changelog.md — CLI changelog
+- https://github.com/github/github-app/blob/main/changelog/changelog.md — GitHub Copilot app changelog
 - https://github.blog/ai-and-ml/github-copilot/ — blog posts
 - https://code.visualstudio.com/updates - VS Code release notes (filter for Copilot-related updates)
 - https://nishanil.github.io/copilot-guide/ - community-maintained guide (check for recent commits or updates)
 
-Also use `gh` CLI to check the latest releases and commits in the `github/copilot-cli` repo.
+Also use GitHub tooling to check the latest releases and commits in the `github/copilot-cli` and `github/github-app` repos.
 
 Look for:
 
@@ -77,10 +81,10 @@ If the new information can be added to existing pages, edit those pages to inclu
 
 ## Step 4 — Open a pull request
 
-Create a pull request with your changes, using the `staged` branch as the base branch. The PR title should summarize what was updated (e.g., "Add/plan command and model marketplace documentation"). The PR body should list:
+Create a pull request with your changes, using the `main` branch as the base branch. The PR title should summarize what was updated (e.g., "Add/plan command and model marketplace documentation"). The PR body should list:
 
 1. What new features or changes were found
 2. What sections of the guide were updated
 3. Links to the source announcements
 
-The PR should target the `staged` branch and include the labels `automated-update` and `copilot-updates`.
+The PR should target the `main` branch and include the labels `automated-update` and `copilot-updates`.

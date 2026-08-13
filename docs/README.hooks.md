@@ -31,7 +31,9 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md#adding-hooks) for guidelines on how to 
 
 | Name | Description | Events | Bundled Assets |
 | ---- | ----------- | ------ | -------------- |
+| [Attester Import Check](../hooks/attester-import-check/README.md) | Verifies PyPI and npm package names against the attester.dev existence oracle before the Copilot coding agent writes them into code, blocking hallucinated dependencies | preToolUse | `check-imports.py`<br />`hooks.json` |
 | [Dependency License Checker](../hooks/dependency-license-checker/README.md) | Scans newly added dependencies for license compliance (GPL, AGPL, etc.) at session end | sessionEnd | `check-licenses.sh`<br />`hooks.json` |
+| [Fix Broken Links](../hooks/fix-broken-links/README.md) | Checks changed web files for broken hyperlinks and SEO anchor issues after each Copilot tool use. | postToolUse | `hooks.json`<br />`link-fix.ps1`<br />`link-fix.sh` |
 | [Governance Audit](../hooks/governance-audit/README.md) | Scans Copilot agent prompts for threat signals and logs governance events | sessionStart, sessionEnd, userPromptSubmitted | `audit-prompt.sh`<br />`audit-session-end.sh`<br />`audit-session-start.sh`<br />`hooks.json` |
 | [Secrets Scanner](../hooks/secrets-scanner/README.md) | Scans files modified during a Copilot coding agent session for leaked secrets, credentials, and sensitive data | sessionEnd | `hooks.json`<br />`scan-secrets.sh` |
 | [Session Auto-Commit](../hooks/session-auto-commit/README.md) | Automatically commits and pushes changes when a Copilot coding agent session ends | sessionEnd | `auto-commit.sh`<br />`hooks.json` |
