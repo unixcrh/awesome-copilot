@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-08-10
+lastUpdated: 2026-08-13
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -191,6 +191,8 @@ my-monorepo/
 ```
 
 When you work inside `packages/api/`, Copilot loads configuration from `packages/api/.github/`, then `packages/.github/` (if it exists), then the root `.github/`. This layered discovery ensures the right context is active no matter where in the repository you're working.
+
+> **Large monorepo search** *(v1.0.79+)*: In large monorepos, GitHub Copilot CLI now uses [tgrep](https://github.com/microsoft/tgrep) (trigram-indexed grep) instead of ripgrep for codebase searches. tgrep builds a trigram index that makes regex searches dramatically faster at scale — queries that would take seconds with ripgrep complete in milliseconds. The switch is automatic; no configuration is needed.
 
 ### Personal Skills Directory
 
@@ -451,7 +453,7 @@ The model picker opens in a **full-screen view** with inline reasoning effort ad
 
 **Auto mode and server-side model routing** (v1.0.43+): When you select **Auto** as your model, the CLI uses server-side model routing for real-time model selection. Instead of locking in a single model at session start, Auto mode evaluates each request and routes it to the most appropriate model dynamically. This means straightforward questions can be handled by a faster model while complex reasoning tasks are automatically escalated — without you needing to switch models manually.
 
-**Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string. Recent models available include **Claude Opus 5** (v1.0.75+), the latest in Anthropic's Opus family for the most demanding tasks, and **Grok 4.5** (v1.0.76+) from xAI.
+**Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string. Recent models available include **Claude Opus 5** (v1.0.75+), the latest in Anthropic's Opus family for the most demanding tasks, **Grok 4.5** (v1.0.76+) from xAI, and **Kimi K3** (v1.0.79+) from Moonshot AI.
 
 **Plan mode model** *(v1.0.74+)*: When using plan mode (which blocks file mutations and keeps changes in a planning phase), you can assign a *separate* model specifically for planning — different from your regular session model. This lets you use a fast, cost-effective model for plan drafting while keeping a more capable model on standby for the implementation phase:
 
@@ -661,9 +663,19 @@ The `/diagnose` command (v1.0.64+) analyzes the current session's logs and surfa
 
 Use `/diagnose` when a session is behaving unexpectedly — it inspects session logs and reports what it finds, making it easier to share diagnostics with support or understand what happened internally.
 
+The `/app` command *(v1.0.79+)* opens the current CLI session in the GitHub Copilot desktop app. This lets you continue the conversation in the app's richer interface — with side-by-side sessions, canvases, and visual agent management — without losing your session state. Requires GitHub Copilot app version 1.1.3 or later:
+
+```
+/app
+```
+
+Use `/app` when you want to hand off a CLI session to the desktop app for parallel work, canvas creation, or visual review of the agent's progress.
+
 **Keyboard shortcuts for queuing messages**: Use **Ctrl+Q** or **Ctrl+Enter** to queue a message (send it while the agent is still working). **Ctrl+D** no longer queues messages — it now has its default terminal behavior. If you have muscle memory for Ctrl+D queuing, switch to Ctrl+Q.
 
 **Directable queue manager** *(v1.0.76+)*: While the agent is working, you can manage your queued messages before they are sent. Open the queue manager to **reorder**, **edit**, **remove**, or **repeat** queued messages — even send one immediately out of turn. This is useful when you think of a better follow-up mid-run or want to reprioritize what the agent works on next.
+
+**Queuing shell commands and slash commands** *(v1.0.79+)*: In addition to prompt messages, you can now queue shell commands (`!some-command`) and supported slash commands to run in order after the current task finishes. This means you can line up an entire sequence of tasks — prompts, shell invocations, and slash commands — and let them execute unattended one after another. Previously only conversational prompts could be queued.
 
 **Background running tasks**: Press **Ctrl+X → B** to move the current running task or shell command to the background. The task continues executing while you can type a new message or review earlier output. This is useful for long-running commands where you want to interact with the agent while waiting for the result.
 
