@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-08-10
+lastUpdated: 2026-08-18
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -191,6 +191,8 @@ my-monorepo/
 ```
 
 When you work inside `packages/api/`, Copilot loads configuration from `packages/api/.github/`, then `packages/.github/` (if it exists), then the root `.github/`. This layered discovery ensures the right context is active no matter where in the repository you're working.
+
+**Fast code search in large monorepos** *(v1.0.79+)*: In repositories too large for ripgrep to search quickly, Copilot CLI automatically switches to [tgrep](https://github.com/microsoft/tgrep) — a trigram-indexed grep that pre-indexes the codebase so regex searches return results in milliseconds regardless of repository size. No configuration is needed; tgrep is used transparently when the codebase is large enough to benefit from indexing.
 
 ### Personal Skills Directory
 
@@ -635,6 +637,14 @@ The `/share html` command exports the current session — including conversation
 
 The exported file contains everything needed to view the session without a network connection and can be shared with teammates or stored for later reference. This complements `/share` (which shares via URL) for cases where an offline or attached format is preferred.
 
+The `/app` command *(v1.0.79+)* opens the current CLI session directly in the **GitHub Copilot desktop app**, so you can continue working with the full app UI — including canvases, parallel agents, and automations — without starting over:
+
+```
+/app
+```
+
+The app opens to the exact session you were in, preserving your conversation context. This requires the GitHub Copilot app 1.1.3 or later to be installed. Use `/app` when you want to switch from the terminal to the richer desktop interface mid-session, or when you want to hand a session off to a teammate who prefers the app experience.
+
 The `/chronicle` command opens an interactive timeline of everything the agent has done in the current session. It shows file changes, tool calls, and conversation turns in chronological order, letting you review the full arc of the session at a glance:
 
 ```
@@ -668,6 +678,14 @@ Use `/diagnose` when a session is behaving unexpectedly — it inspects session 
 **Background running tasks**: Press **Ctrl+X → B** to move the current running task or shell command to the background. The task continues executing while you can type a new message or review earlier output. This is useful for long-running commands where you want to interact with the agent while waiting for the result.
 
 **Shell command history in normal mode** (v1.0.65+): The **↑/↓** arrow keys and **Ctrl+R** reverse search now include past shell commands (commands run with `!`) while you are in normal (non-shell) input mode. Previously you had to type `!` to enter shell mode before history worked. Now you can recall and re-run a shell command without switching modes first — useful for quickly repeating a build, test, or diagnostic command from earlier in the session.
+
+**Timeline tool durations** *(v1.0.78+)*: The timeline now shows how long each tool call took — displayed right-aligned in the tool header and ticking live while the tool is running (for calls of at least 5 seconds). This makes it easy to spot slow tool calls at a glance. Enabled by default; disable with:
+
+```
+/settings showToolDurations
+```
+
+Set `showToolDurations` to `false` in your settings to hide the durations if you prefer a less busy timeline.
 
 **Inline image rendering** (v1.0.64+): The CLI can display images inline in the terminal when your terminal supports it. If an MCP tool, agent, or attachment returns an image, it is rendered directly in the conversation timeline rather than shown as a file path or URL. This works in terminals with image protocol support (such as iTerm2, Kitty, Wezterm, and tmux with appropriate configuration).
 
