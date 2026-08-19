@@ -3,7 +3,7 @@ title: "Using Automations in the GitHub Copilot app"
 description: "A practical guide to getting started with Copilot app automations using templates, iterative refinement, and real-world examples."
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-06-17
+lastUpdated: 2026-08-19
 estimatedReadingTime: "10 minutes"
 tags:
   - copilot-app
@@ -51,9 +51,16 @@ This often produces several concrete automation ideas in one pass. Then turn the
 2. Click **New automation**.
 3. Start from a template or from scratch.
 4. Give it a clear name and a specific prompt.
-5. Choose when it runs (manual, hourly, daily, or weekly).
+5. Choose when it runs — trigger options include:
+   - **Manual** — run on demand
+   - **Hourly / Daily / Weekly** — time-based schedules
+   - **CRON** — a custom cron expression for fine-grained scheduling
+   - **Issue** — triggers when a new issue is opened (e.g., triage incoming issues automatically)
+   - **Pull Request** — triggers on PR events (e.g., auto-review or label new PRs)
 6. Optionally set mode, model, and reasoning effort.
 7. Use **Create and run** for the first run so you can immediately inspect output and refine.
+
+> **Cloud execution**: Automations run in the cloud, so they continue even when your machine is off or the app is closed. This makes time-based and event-driven automations reliable for recurring team workflows.
 
 If your first version is only 70% right, that is normal. The fastest path is to iterate from a real run.
 

@@ -3,7 +3,7 @@ title: 'Copilot Configuration Basics'
 description: 'Learn how to configure GitHub Copilot at user, workspace, and repository levels to optimize your AI-assisted development experience.'
 authors:
   - GitHub Copilot Learning Hub Team
-lastUpdated: 2026-08-10
+lastUpdated: 2026-08-19
 estimatedReadingTime: '10 minutes'
 tags:
   - configuration
@@ -451,7 +451,7 @@ The model picker opens in a **full-screen view** with inline reasoning effort ad
 
 **Auto mode and server-side model routing** (v1.0.43+): When you select **Auto** as your model, the CLI uses server-side model routing for real-time model selection. Instead of locking in a single model at session start, Auto mode evaluates each request and routes it to the most appropriate model dynamically. This means straightforward questions can be handled by a faster model while complex reasoning tasks are automatically escalated — without you needing to switch models manually.
 
-**Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string. Recent models available include **Claude Opus 5** (v1.0.75+), the latest in Anthropic's Opus family for the most demanding tasks, and **Grok 4.5** (v1.0.76+) from xAI.
+**Model family aliases** (v1.0.64+): Instead of typing a full model name, you can use short family aliases in the model setting: `opus`, `sonnet`, `haiku` (Anthropic), and `gpt`, `gemini` (Google/OpenAI). The CLI resolves the alias to the latest available model in that family. This is especially useful in scripts or configuration files where you want to track the best model in a family without hardcoding a version string. Recent models available include **Claude Opus 5** (v1.0.75+), the latest in Anthropic's Opus family for the most demanding tasks, **Grok 4.5** (v1.0.76+) and **Grok 4.6** (v1.0.80+, GA) from xAI, and **Gemini 3.7 Flash** (GA) from Google. Grok 4.6 and Gemini 3.7 Flash are also available in GitHub Copilot across all clients (VS Code, CLI, web, and app).
 
 **Plan mode model** *(v1.0.74+)*: When using plan mode (which blocks file mutations and keeps changes in a planning phase), you can assign a *separate* model specifically for planning — different from your regular session model. This lets you use a fast, cost-effective model for plan drafting while keeping a more capable model on standby for the implementation phase:
 
@@ -822,6 +822,8 @@ These flags apply only to the current invocation — your persisted sandbox pref
 **Sandbox auth settings** *(v1.0.79-8+, breaking change)*: The `/sandbox` configuration dialog now groups git, `gh`, and (on macOS) keychain settings under a new **Auth** tab. The underlying settings keys moved from `sandbox.gitAuth`/`sandbox.ghAuth` to `sandbox.auth.git`/`sandbox.auth.gh`. There is no automatic migration — the old keys are silently ignored in settings files, and SDK requests that still send them are rejected as invalid. Update any saved configuration to the new key names.
 
 **`worktreeBaseRef` setting** *(v1.0.79-8+)*: Controls whether `/worktree`, `/worktree new`, and the `--worktree` startup flag create the new worktree from `HEAD` or from the remote default branch. All three now default to `HEAD`; previously `--worktree` defaulted to starting from the remote default branch. Set this in `/settings` if you want worktrees to branch from the remote default instead.
+
+**Fast search in large monorepos** *(v1.0.79+)*: In large monorepos, the CLI now uses [tgrep](https://github.com/microsoft/tgrep) — a trigram-indexed grep — instead of ripgrep for file searches. Tgrep builds an index of your codebase and uses it to answer regex queries significantly faster than line-by-line scanning, which makes tools like `@codebase`, `/search`, and context gathering noticeably snappier in very large repositories. No configuration is needed; the CLI switches automatically based on repository size.
 
 The `--attachment` flag (available in prompt mode, `-p`) lets you attach files — images or native documents — to the initial prompt in non-interactive mode:
 
